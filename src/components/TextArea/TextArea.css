@@ -1,0 +1,16 @@
+h3 {
+  font-weight: bold;
+  font-size: 25px;
+  color: #4CAF50;
+}
+
+.textarea {
+  border-width: 1.3px;
+  border-color: #4CAF50;
+  padding: 10px;
+  width: 40vw;
+  font-size: 16px;
+  border-radius: 5px;
+  margin-bottom: 30px;
+  line-height: 25px;
+}
