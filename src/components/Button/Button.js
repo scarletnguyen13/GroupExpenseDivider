@@ -8,7 +8,7 @@ class Button extends Component {
         type={this.props.type}
         className={`${this.props.name}-button`}
       >
-        {this.props.name.toUpperCase()}
+        {this.props.text.toUpperCase()}
       </button>
     );
   }

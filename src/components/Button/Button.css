@@ -1,9 +1,10 @@
-.export-button {
+button {
   padding: 15px;
   background-color: #4CAF50;
   border-radius: 8px;
   color: white;
   font-size: 16px;
   font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-  font-weight: 900
+  font-weight: 900;
+  margin: 10px;
 }

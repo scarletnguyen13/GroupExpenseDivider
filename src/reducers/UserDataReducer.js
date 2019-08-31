@@ -20,13 +20,14 @@ const userDataReducer = (state = INITIAL_STATE, action) => {
             id: generateRandomId(),
             name: participant.trim()
           })
-        )
+        ),
       });
     }
     case 'UPDATE_ITEMS': {
+      console.log(state.participants)
       const { event } = action.payload;
       return Object.assign({}, state, {
-        items: event.target.value.trim().split(",").filter(item => item.length > 0).map(item => 
+        items: event.target.value.trim().split(",").filter(item => item.length > 0).map(item =>
           Object.assign(item, {
             id: generateRandomId(),
             name: item.split("$").length > 1 ? item.split("$")[0].trim() : item,
@@ -35,8 +36,10 @@ const userDataReducer = (state = INITIAL_STATE, action) => {
         ),
       });
     }
-    default:
+    default: {
+      console.log(state);
       return state;
+    }
   };
 };
 
