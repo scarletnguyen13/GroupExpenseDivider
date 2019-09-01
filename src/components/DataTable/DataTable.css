@@ -8,6 +8,8 @@
 #participants-table td, #participants-table th {
   border: 1px solid #ddd;
   padding: 8px;
+  cursor: pointer;
+  user-select: none;
 }
 
 /* #participants-table tr:nth-child(even){background-color: #f2f2f2;} */
