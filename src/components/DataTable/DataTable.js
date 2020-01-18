@@ -34,8 +34,7 @@ class DataTable extends Component {
 
     this.props.updateYesNo(e.target.id, chosenParticipant);
 
-    let backgroundColor = e.target.style.backgroundColor;
-    if (backgroundColor === "red") {
+    if (tbl.rows[row].cells[col].innerHTML === "No") {
       tbl.rows[row].cells[col].style = 'table td:hover{ background-color: rgb(160, 255, 180) }, background-color: "white"';
     } else {
       tbl.rows[row].cells[col].style.backgroundColor = "red";
@@ -50,6 +49,8 @@ class DataTable extends Component {
     const totalPrice = parseFloat(userData.items.map(i => i.price).reduce((a, b) => a + b, 0), 10);
     const pricePerPerson = isParticipantsListNotEmpty ? totalPrice / userData.participants.length : 0;
 
+    console.log(this.roundToTwoDecimalPlaces(pricePerPerson));
+
     let row = 1;
     let col = 2;
 
@@ -59,7 +60,17 @@ class DataTable extends Component {
           <tbody className='table-body'>
             <tr>{this.renderTableHeader(userData.participants)}</tr>
             {userData.items.map(item => {
-              const { id, name, price, yesNoList } = item
+              const { id, name, price, yesNoList, averagePrice } = item
+              let officialAveragePrice = 0;
+              if (averagePrice === undefined) {
+                if (userData.participants.length <= 1) {
+                  officialAveragePrice = price;
+                } else {
+                  officialAveragePrice = this.roundToTwoDecimalPlaces(price / userData.participants.length)
+                }
+              } else {
+                  officialAveragePrice = averagePrice;
+              }
               const horizontal = (
                 <tr key={id}>
                   <td>{name}</td>
@@ -73,7 +84,7 @@ class DataTable extends Component {
                       return cell;
                   })
                   }
-                  <td>{"$" + (userData.participants.length > 0 ? this.roundToTwoDecimalPlaces(price / userData.participants.length) : 0)}</td>
+                  <td>{"$" + officialAveragePrice}</td>
                 </tr>
               );
               row++;

@@ -5,6 +5,10 @@ function generateRandomId() {
   return `_${Math.random().toString(36).substr(2, 9)}`;
 }
 
+function roundToTwoDecimalPlaces(num) {
+  return Math.round((num + 0.00001) * 100) / 100;
+}
+
 const INITIAL_STATE = {
   participants: [],
   items: []
@@ -56,12 +60,42 @@ const userDataReducer = (state = INITIAL_STATE, action) => {
       
       yesNoList.splice(index, 1, !yesNo);
 
+      const onlyYesLength = yesNoList.filter(value => value === true).length;
+
+      const multidimensionalYesNo = items.map(i => Object.assign({}, {
+        yesNoList: i.yesNoList,
+        averagePrice: i.averagePrice
+      }))
+      const itemIndex = items.findIndex(i => i.id === itemId)
+
+      const itemPrice = items[itemIndex].price
+
+      multidimensionalYesNo[itemIndex] = Object.assign({}, {
+        yesNoList: yesNoList,
+        averagePrice: roundToTwoDecimalPlaces(onlyYesLength > 1 ? (itemPrice / onlyYesLength) : itemPrice)
+      })
+
+      console.log(multidimensionalYesNo);
+      
+      // const numberOfYesPerItem = [];
+
+      // for (let col = 0; col < multidimensionalYesNo[0].length; col++) {
+      //   var numberOfYes = 0;
+      //   for (let row = 0; row < multidimensionalYesNo.length; row++) {
+      //     if (multidimensionalYesNo[row][col]) numberOfYes++
+      //   }
+      //   numberOfYesPerItem.push(numberOfYes);
+      // }
+
+      // console.log(numberOfYesPerItem);
+
       return Object.assign({}, state, {
         items: items.map(item => {
           if(item.id === itemId) {
             return Object.assign({}, {
               ...item,
-              yesNoList: yesNoList
+              yesNoList: yesNoList,
+              averagePrice: roundToTwoDecimalPlaces(onlyYesLength > 1 ? (item.price / onlyYesLength) : item.price)
             })
           } else {
             return Object.assign({}, item)
