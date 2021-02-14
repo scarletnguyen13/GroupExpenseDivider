@@ -1,15 +1,18 @@
 import React, { Component } from 'react';
 import './DataTable.css';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { updateYesNo } from '../../actions/UserDataActions';
 
 class DataTable extends Component {
   constructor(props) {
     super(props);
     this.handleYesNo = this.handleYesNo.bind(this);
   }
- 
-  renderTableHeader() {
+
+  renderTableHeader(participants) {
     let header = ["items", "price"]
-    return header.concat(this.props.participants
+    return header.concat(participants
                  .map(function (el) { return el.name; }))
                  .concat("Price Item / Person").map((key, index) => {
        return <th key={index}>{key.toUpperCase()}</th>
@@ -23,21 +26,30 @@ class DataTable extends Component {
   handleYesNo(e) {
     const tbl = document.getElementById('participants-table');
     const cellInfo = e.target.dataset.value.split("-").map(num => parseInt(num));
+    
     const row = cellInfo[0];
     const col = cellInfo[1];
-    let backgroundColor = e.target.style.backgroundColor;
-    if (backgroundColor === "red") {
+    
+    const chosenParticipant = tbl.rows[0].cells[col].innerHTML;
+
+    this.props.updateYesNo(e.target.id, chosenParticipant);
+
+    if (tbl.rows[row].cells[col].innerHTML === "No") {
       tbl.rows[row].cells[col].style = 'table td:hover{ background-color: rgb(160, 255, 180) }, background-color: "white"';
-      tbl.rows[row].cells[col].innerHTML = "Yes";
     } else {
       tbl.rows[row].cells[col].style.backgroundColor = "red";
-      tbl.rows[row].cells[col].innerHTML = "No";
     }
   }
 
   render() {
-    const totalPrice = parseFloat(this.props.items.map(i => i.price).reduce((a, b) => a + b, 0), 10);
-    const pricePerPerson = this.props.participants.length > 0 ? totalPrice / this.props.participants.length : 0;
+    const { userData } = this.props;
+
+    const isParticipantsListNotEmpty = userData.participants.length > 0
+    
+    const totalPrice = parseFloat(userData.items.map(i => i.price).reduce((a, b) => a + b, 0), 10);
+    const pricePerPerson = isParticipantsListNotEmpty ? totalPrice / userData.participants.length : 0;
+
+    console.log(this.roundToTwoDecimalPlaces(pricePerPerson));
 
     let row = 1;
     let col = 2;
@@ -46,32 +58,42 @@ class DataTable extends Component {
       <div id='data-container'>
         <table id='participants-table'>
           <tbody className='table-body'>
-            <tr>{this.renderTableHeader()}</tr>
-            {this.props.items.map((item, index) => {
-              const { id, name, price } = item
+            <tr>{this.renderTableHeader(userData.participants)}</tr>
+            {userData.items.map(item => {
+              const { id, name, price, yesNoList, averagePrice } = item
+              let officialAveragePrice = 0;
+              if (averagePrice === undefined) {
+                if (userData.participants.length <= 1) {
+                  officialAveragePrice = price;
+                } else {
+                  officialAveragePrice = this.roundToTwoDecimalPlaces(price / userData.participants.length)
+                }
+              } else {
+                  officialAveragePrice = averagePrice;
+              }
               const horizontal = (
                 <tr key={id}>
                   <td>{name}</td>
                   <td>{"$" + price}</td>
                   {
-                    this.props.participants.map(index => {
+                    yesNoList.map((isYes, index) => {
                       const cell = (
-                        <td key={index} onClick={this.handleYesNo} data-value={`${row}-${col}`} id={"Yes"}>Yes</td>
+                        <td key={index} onClick={this.handleYesNo} data-value={`${row}-${col}`} id={id}>{isYes ? "Yes" : "No"}</td>
                       )
-                      col === this.props.participants.length + 1 ? col = 2 : col++;
+                      col === userData.participants.length + 1 ? col = 2 : col++;
                       return cell;
                   })
                   }
-                  <td>{"$" + (this.props.participants.length > 0 ? this.roundToTwoDecimalPlaces(price / this.props.participants.length) : 0)}</td>
+                  <td>{"$" + officialAveragePrice}</td>
                 </tr>
-              )
+              );
               row++;
               return horizontal;
             })}
             <tr key='calculation'>
               <td>Total / Person</td>
               <td>{ "$" + totalPrice }</td>
-              {this.props.participants.map(index => {
+              {userData.participants.map(index => {
                 return (
                   <td key={index}> { "$" + this.roundToTwoDecimalPlaces(pricePerPerson) }</td>
                 )
@@ -85,4 +107,15 @@ class DataTable extends Component {
   }
 }
 
-export default DataTable;
+const mapStateToProps = (state) => {
+  const { userData } = state;
+  return { userData };
+};
+
+const mapDispatchToProps = dispatch => (
+  bindActionCreators({
+    updateYesNo
+  }, dispatch)
+);
+
+export default connect(mapStateToProps, mapDispatchToProps)(DataTable);
